@@ -46,7 +46,11 @@ class Text2SQLDatasetLoader(HFDatasetLoader):
     def _load_corpus(self) -> None:
         path_to_data_dir = snapshot_download(repo_id=self.hf_corpus_dataset_path, repo_type="dataset")
         time.sleep(0.5)
-        path_to_context = Path(path_to_data_dir, f"{self.dataset_name_short}-corpus-{self.split}.json")
+        if self.dataset_name_short == "bird":
+            dname = f"corpus-{self.split}.json"
+        else:
+            dname = f"{self.dataset_name_short}-corpus-{self.split}.json"
+        path_to_context = Path(path_to_data_dir, dname)
         self.path_to_database_dir = Path(path_to_data_dir, f"{self.split}_database")
         with open(path_to_context, "r") as file:
             self.corpus = json.load(file)

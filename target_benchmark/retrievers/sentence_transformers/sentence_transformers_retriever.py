@@ -23,7 +23,7 @@ class SentenceTransformersRetriever(AbsStandardEmbeddingRetriever):
         """
         super().__init__("nested array")
         self.num_rows = num_rows
-        self.model = SentenceTransformer(model_name_or_path, **kwargs)
+        self.model = SentenceTransformer(model_name_or_path, trust_remote_code=True, **kwargs)
 
     def embed_query(self, query: str, dataset_name: str) -> np.ndarray:
         return self.model.encode(query, convert_to_tensor=True, normalize_embeddings=True).cpu().numpy()

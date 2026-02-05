@@ -1,3 +1,39 @@
+This is a patched version of the TARGET benchmark. Current patches:
+
+- `trust_remote_code` is required for some embedding models.
+  - Fix: `target_benchmark/retrievers/sentence_transformers/sentence_transformers_retriever.py L:26`
+
+  ```python
+        self.model = SentenceTransformer(model_name_or_path, **kwargs)
+  ```
+
+  into:
+
+  ```python
+        self.model = SentenceTransformer(model_name_or_path, trust_remote_code=True, **kwargs)
+  ```
+
+  and of course, only use models you trust.
+
+- bird dataset is broken
+  - Fix: `target_benchmark/dataset_loaders/Text2SQLDatasetLoader.py L:49`
+
+  ```python
+        path_to_context = Path(path_to_data_dir, f"{self.dataset_name_short}-corpus-{self.split}.json")
+  ```
+
+  into:
+
+  ```python
+        if self.dataset_name_short == "bird":
+            dname = f"corpus-{self.split}.json"
+        else:
+            dname = f"{self.dataset_name_short}-corpus-{self.split}.json"
+        path_to_context = Path(path_to_data_dir, dname)
+  ```
+
+---
+
 # TARGET: Table Retrieval for Generative Tasks Benchmark
 
 ## Set Up TARGET
@@ -25,6 +61,7 @@ export OPENAI_API_KEY=<your openai api key>
 ```
 
 ## Features
+
 - run evaluations on TARGET's baseline retrievers
 - implement your own custom retrievers and generators
 - create your own custom task
@@ -67,9 +104,9 @@ Inherit from this class if your retriever uses a **custom format for embedding t
 To use this class, implement the following two methods:
 
 1. **`embed_corpus`**
-	- **Parameters**:
-     - `dataset_name`: Identifier for the dataset.
-     - `corpus`: The dataset to embed, provided as an iterable of dictionaries.
+   - **Parameters**:
+   - `dataset_name`: Identifier for the dataset.
+   - `corpus`: The dataset to embed, provided as an iterable of dictionaries.
 
 2. **`retrieve`**
    - **Parameters**:
@@ -98,8 +135,8 @@ class YourRetriever(AbsCustomEmbeddingRetriever):
         pass
 ```
 
-
 ### Inherit from `AbsStandardEmbeddingRetriever` Class
+
 Inherit from this class if your retriever returns a vector embedding for each table and query. It automatically handles vector data storage using an **in-memory Qdrant vector database**, so data is **not persisted across calls to `TARGET.run`**. (support for persistence across evaluation runs will be included in the future)
 
 **Why Inherit from This Class?**
@@ -120,10 +157,10 @@ To inherit from this class, you need to implement two methods:
    - **Returns**: embedding of query in a numpy array
 
 2. **`embed_corpus`**: Returns embedding vectors for each item in the corpus (e.g., tables or documents).
-	- **Parameters**:
-     - `dataset_name`: Identifier for the dataset.
-     - `corpus_entry`: An entry in the corpus dataset.
-    - **Returns**: embedding of corpus entry in a numpy array
+   - **Parameters**:
+   - `dataset_name`: Identifier for the dataset.
+   - `corpus_entry`: An entry in the corpus dataset.
+   - **Returns**: embedding of corpus entry in a numpy array
 
 ```python
 from target_benchmark.retrievers import AbsStandardEmbeddingRetriever
@@ -143,14 +180,16 @@ class YourRetriever(AbsStandardEmbeddingRetriever):
 ### Note on `corpus` and `corpus_entry` Formatting
 
 TARGET provides standardized formatting for the corpus datasets. More specifically, each TARGET corpus dataset includes the following columns:
+
 - **database_id (str)**: database that the table belongs to.
 - **table_id (str)**: table's identifier.
 - **table**: the actual table contents. default format is nested array, but you can specify the expected format to be `dictionary` or `dataframe` in your retriever's constructor. Tables are automatically converted to the expected format before passed into the `embed_corpus` function.
 - **context (dict)**: any metadata associated with the table. for example, text-2-sql datasets' context often include primary and foreign key information.
 
-
 Both retriever classes' `embed_corpus` function takes in corpus information.
+
 - `AbsStandardEmbeddingRetriever`: `corpus_entry` is a single entry within the corpus dataset. for example, it may look like this:
+
 ```python
 {
     "database_id": "0",
@@ -160,7 +199,9 @@ Both retriever classes' `embed_corpus` function takes in corpus information.
   "table_section_title": "Results"},
 }
 ```
+
 - `AbsCustomEmbeddingRetriever`: `corpus` is an iterable of dictionaries. Each dictionary contains a batch of corpus entries. For example:
+
 ```python
 {
     "database_id": ["0", "1"],
@@ -169,25 +210,22 @@ Both retriever classes' `embed_corpus` function takes in corpus information.
     "context": [{"section_title": "Indoor -- List of Medalists"}, {"section_title": "Literature , writing , and translation"}],
 }
 ```
+
 The length of the lists will correspond to the batch size specified when calling `TARGET.run`.
 
 ## Create Custom Generators
 
 Creating your customer generators for downstream tasks is also straightforward. You only need to implement one function,
+
 - **`generate`**
-	- **Parameters**:
-        - `table_str`: String of the retrieved table contents.
-        - `query`: The natural language query.
-
+  - **Parameters**: - `table_str`: String of the retrieved table contents. - `query`: The natural language query.
     - **Returns**::
-        - a dictionary for flexibility. the contained keys closely correlates to the configuration of the task that invokes the generator, as different tasks require different kinds of information.
-        - for text-2-sql tasks, the dictionary is expected to contain keys
-            - `sql_query`: for the generated sql
-            - `database_id`: id of the database to query. Why needed? if tables from multiple databases are passed into the generator's context, the generator will need to pick from one of the databases when creating the query.
-        - for other tasks, the dictionary is expected to contain key
-            - `content`: for the generated response.
-
-
+      - a dictionary for flexibility. the contained keys closely correlates to the configuration of the task that invokes the generator, as different tasks require different kinds of information.
+      - for text-2-sql tasks, the dictionary is expected to contain keys
+        - `sql_query`: for the generated sql
+        - `database_id`: id of the database to query. Why needed? if tables from multiple databases are passed into the generator's context, the generator will need to pick from one of the databases when creating the query.
+      - for other tasks, the dictionary is expected to contain key
+        - `content`: for the generated response.
 
 ```python
 from target_benchmark.generators import AbsGenerator
@@ -205,9 +243,11 @@ from target_benchmark.tasks import QuestionAnsweringTask
 qa_task = QuestionAnsweringTask(task_generator=YourGenerator())
 target_evaluator = TARGET(downstream_tasks=qa_task)
 ```
+
 Note that here instead of specifying the task by its name, we are passing in a task object instead with the generator set to our created custom generator.
 
 ## Using the Evaluation Scripts
+
 You can run the evaluation scripts in the `experiments` folder to run baselines retrievers included in the TARGET paper on all tasks.
 
 ### Command-Line Arguments
