@@ -1,4 +1,12 @@
-This is a patched version of the TARGET benchmark. Current patches:
+This is a patched version of the TARGET benchmark.
+
+To install this version, run 
+
+```bash
+pip install git+https://github.com/inwonakng/target-patched
+```
+
+## Current patches
 
 - `trust_remote_code` is required for some embedding models.
   - Fix: `target_benchmark/retrievers/sentence_transformers/sentence_transformers_retriever.py L:26`
@@ -14,6 +22,13 @@ This is a patched version of the TARGET benchmark. Current patches:
   ```
 
   and of course, only use models you trust.
+
+- `xformers` is missing (for Stella?)
+  - manually installed (`0.0.34`)
+
+- `qdrant-client` version is wrong.
+  - The code usese `client.search`  which was deprecated 1.16.0 (https://github.com/qdrant/qdrant-client/releases/tag/v1.16.0). The current pyproject.toml lists `qdrant-client^=1.9.0`, allowing for versions past 1.16.0 to be installed.
+  - Fix: change `qdrant-client` version in `target_benchmark/pyproject.toml` to `qdrant-client = ">=1.9.1,<1.15"`
 
 - bird dataset is broken
   - Fix: `target_benchmark/dataset_loaders/Text2SQLDatasetLoader.py L:49`
