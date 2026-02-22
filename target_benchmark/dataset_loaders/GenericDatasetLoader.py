@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Literal
 
-from datasets import DatasetDict, load_dataset
+from datasets import load_dataset
 
 from target_benchmark.dataset_loaders.AbsDatasetLoader import AbsDatasetLoader
 
@@ -47,16 +47,8 @@ class GenericDatasetLoader(AbsDatasetLoader):
 
     def _load_corpus(self) -> None:
         if not self.corpus:
-            self.corpus = DatasetDict()
-        if self.split not in self.corpus:
-            self.corpus[self.split] = load_dataset(
-                path=str(self.corpus_path), split=self.split
-            )
+            self.corpus = load_dataset(path=str(self.corpus_path), split=self.split)
 
     def _load_queries(self) -> None:
         if not self.queries:
-            self.queries = DatasetDict()
-        if self.split not in self.queries:
-            self.queries[self.split] = load_dataset(
-                path=str(self.queries_path), split=self.split
-            )
+            self.queries = load_dataset(path=str(self.queries_path), split=self.split)

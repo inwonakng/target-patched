@@ -47,6 +47,21 @@ pip install git+https://github.com/inwonakng/target-patched
         path_to_context = Path(path_to_data_dir, dname)
   ```
 
+- `GenericDatasetLoader._load_corpus/queries()` stores data as a `DatasetDict` instead of a `Dataset`, making `get_corpus_size()` return a `dict` instead of an `int`.
+  - `AbsDatasetLoader.get_corpus_size()` calls `self.corpus.num_rows`, which returns `{'test': N}` for a `DatasetDict` but `N` for a `Dataset`. This causes a `TypeError` in `TARGET._calculate_corpus_size()`.
+  - `HFDatasetLoader` correctly selects the split during load; `GenericDatasetLoader` should do the same.
+  - Fix: in `target_benchmark/dataset_loaders/GenericDatasetLoader.py`, replace the `DatasetDict`-based loading with direct split selection (matching `HFDatasetLoader`):
+
+  ```python
+  def _load_corpus(self) -> None:
+      if not self.corpus:
+          self.corpus = load_dataset(path=str(self.corpus_path), split=self.split)
+
+  def _load_queries(self) -> None:
+      if not self.queries:
+          self.queries = load_dataset(path=str(self.queries_path), split=self.split)
+  ```
+
 - `GenericDatasetLoader` is never used when registering custom local datasets via `GenericDatasetConfigDataModel`.
   - `TARGET.create_dataloaders()` (`target_benchmark/evaluators/TARGET.py L:260`) instantiates `GenericDatasetConfigDataModel` (a Pydantic model with no `.load()` method) instead of `GenericDatasetLoader`, causing an `AttributeError` at runtime.
   - Fix: import `GenericDatasetLoader` and use it on that line:
