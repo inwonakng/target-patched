@@ -1,6 +1,6 @@
 This is a patched version of the TARGET benchmark.
 
-To install this version, run 
+To install this version, run
 
 ```bash
 pip install git+https://github.com/inwonakng/target-patched
@@ -27,7 +27,7 @@ pip install git+https://github.com/inwonakng/target-patched
   - manually installed (`0.0.34`)
 
 - `qdrant-client` version is wrong.
-  - The code usese `client.search`  which was deprecated 1.16.0 (https://github.com/qdrant/qdrant-client/releases/tag/v1.16.0). The current pyproject.toml lists `qdrant-client^=1.9.0`, allowing for versions past 1.16.0 to be installed.
+  - The code usese `client.search` which was deprecated 1.16.0 (https://github.com/qdrant/qdrant-client/releases/tag/v1.16.0). The current pyproject.toml lists `qdrant-client^=1.9.0`, allowing for versions past 1.16.0 to be installed.
   - Fix: change `qdrant-client` version in `target_benchmark/pyproject.toml` to `qdrant-client = ">=1.9.1,<1.15"`
 
 - bird dataset is broken
@@ -45,6 +45,17 @@ pip install git+https://github.com/inwonakng/target-patched
         else:
             dname = f"{self.dataset_name_short}-corpus-{self.split}.json"
         path_to_context = Path(path_to_data_dir, dname)
+  ```
+
+- Removed `langchain-*` dependencies
+  - This is mostly used in generative models, which are not necessary for evaluating retrieval. The versions pinned are too old to and cause conflicts when adding newer dependencies, so I just removed them for now. This means the user needs to manually install the correct versions if they want the langchain aspect of this project.
+  ```
+  # commented out in pyproject.toml
+  langchain           = "^0.1.16"
+  langchain-community = "^0.0.34"
+  langchain-core      = "^0.1.45"
+  langchain-openai    = "^0.0.8"
+  langchain-text-splitters = "^0.0.1"
   ```
 
 ---
