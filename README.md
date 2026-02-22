@@ -47,6 +47,17 @@ pip install git+https://github.com/inwonakng/target-patched
         path_to_context = Path(path_to_data_dir, dname)
   ```
 
+- `GenericDatasetLoader` is never used when registering custom local datasets via `GenericDatasetConfigDataModel`.
+  - `TARGET.create_dataloaders()` (`target_benchmark/evaluators/TARGET.py L:260`) instantiates `GenericDatasetConfigDataModel` (a Pydantic model with no `.load()` method) instead of `GenericDatasetLoader`, causing an `AttributeError` at runtime.
+  - Fix: import `GenericDatasetLoader` and use it on that line:
+
+  ```python
+  from target_benchmark.dataset_loaders.GenericDatasetLoader import GenericDatasetLoader
+  # ...
+  elif isinstance(config, GenericDatasetConfigDataModel):
+      eval_dataloaders[dataset_name] = GenericDatasetLoader(**config.model_dump())
+  ```
+
 - Removed dependencies
   - I'm commenting out major dependeices (like `transformers` or `numpy`), so that the other project that depends on this benchmark should take care of the dependencies.
 

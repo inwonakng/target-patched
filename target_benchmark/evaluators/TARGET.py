@@ -15,6 +15,7 @@ from target_benchmark.dataset_loaders import (
     NeedleInHaystackDataLoader,
     Text2SQLDatasetLoader,
 )
+from target_benchmark.dataset_loaders.GenericDatasetLoader import GenericDatasetLoader
 from target_benchmark.dataset_loaders.AbsDatasetLoader import AbsDatasetLoader
 from target_benchmark.dataset_loaders.LoadersDataModels import (
     DatasetConfigDataModel,
@@ -257,7 +258,7 @@ class TARGET:
             elif isinstance(config, HFDatasetConfigDataModel):
                 eval_dataloaders[dataset_name] = HFDatasetLoader(**config.model_dump())
             elif isinstance(config, GenericDatasetConfigDataModel):
-                eval_dataloaders[dataset_name] = GenericDatasetConfigDataModel(**config.model_dump())
+                eval_dataloaders[dataset_name] = GenericDatasetLoader(**config.model_dump())
             else:
                 self.logger.warning(
                     f"The dataset config passed in for {dataset_name} is not a valid dataset config data model. Skipping..."
