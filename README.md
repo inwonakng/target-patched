@@ -60,6 +60,11 @@ pip install git+https://github.com/inwonakng/target-patched
   transformers        = "^4.41.2"
   ```
 
+  - `regex`: This one is used by OTTQA retriever code (sparse retrieval). hopefully the new ones are backwards compatible.
+  ```
+  regex               = "^2023.10.3"
+  ```
+
 ---
 
 # TARGET: Table Retrieval for Generative Tasks Benchmark
