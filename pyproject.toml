@@ -26,7 +26,7 @@ packages = [{ include = "target_benchmark" }]
 python = ">=3.9,<4.0"
 
 # Core dependencies
-datasets = "^2.19.0"
+# datasets = "^2.19.0"
 evaluate = "^0.4.2"
 func-timeout = "^4.3.5"
 hnswlib = "^0.8.0"

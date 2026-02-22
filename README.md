@@ -48,33 +48,7 @@ pip install git+https://github.com/inwonakng/target-patched
   ```
 
 - Removed dependencies
-  - `transformers`: is only used for TAPAS, which should stay in newer versions anyways.
-  - `langchain-*`: This is mostly used in generative models, which are not necessary for evaluating retrieval. The versions pinned are too old to and cause conflicts when adding newer dependencies, so I just removed them for now. This means the user needs to manually install the correct versions if they want the langchain aspect of this project.
-
-  ```
-  # commented out in pyproject.toml
-  langchain           = "^0.1.16"
-  langchain-community = "^0.0.34"
-  langchain-core      = "^0.1.45"
-  langchain-openai    = "^0.0.8"
-  langchain-text-splitters = "^0.0.1"
-  transformers        = "^4.41.2"
-  ```
-
-  - `regex`: This one is used by OTTQA retriever code (sparse retrieval). hopefully the new ones are backwards compatible.
-
-  ```
-  regex               = "^2023.10.3"
-  ```
-
-  - `numpy`, `pandas`, `scikit-learn`, `scipy`: these are based on numpy (`<2.0`) which we can't be using any more.
-
-  ```
-  numpy               = "^1.26.4"
-  pandas              = "^2.2.2"
-  scipy               = "^1.13.0"
-  scikit-learn        = "^1.3.0"
-  ```
+  - I'm commenting out major dependeices (like `transformers` or `numpy`), so that the other project that depends on this benchmark should take care of the dependencies.
 
 ---
 
