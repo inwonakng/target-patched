@@ -47,8 +47,9 @@ pip install git+https://github.com/inwonakng/target-patched
         path_to_context = Path(path_to_data_dir, dname)
   ```
 
-- Removed `langchain-*` dependencies
-  - This is mostly used in generative models, which are not necessary for evaluating retrieval. The versions pinned are too old to and cause conflicts when adding newer dependencies, so I just removed them for now. This means the user needs to manually install the correct versions if they want the langchain aspect of this project.
+- Removed dependencies
+  - `transformers`: is only used for TAPAS, which should stay in newer versions anyways.
+  - `langchain-*`: This is mostly used in generative models, which are not necessary for evaluating retrieval. The versions pinned are too old to and cause conflicts when adding newer dependencies, so I just removed them for now. This means the user needs to manually install the correct versions if they want the langchain aspect of this project.
   ```
   # commented out in pyproject.toml
   langchain           = "^0.1.16"
@@ -56,6 +57,7 @@ pip install git+https://github.com/inwonakng/target-patched
   langchain-core      = "^0.1.45"
   langchain-openai    = "^0.0.8"
   langchain-text-splitters = "^0.0.1"
+  transformers        = "^4.41.2"
   ```
 
 ---
