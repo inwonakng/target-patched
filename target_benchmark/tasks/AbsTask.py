@@ -125,10 +125,10 @@ class AbsTask(ABC):
         return cls.append_nih_datasets(cls._get_default_dataset_config())
 
     def _validate_dataset_loaders(self, dataset_loaders: Dict[str, AbsDatasetLoader]):
-        for dataset_name in dataset_loaders.keys():
-            if dataset_name not in self.dataset_config.keys():
+        for loader_key, loader in dataset_loaders.items():
+            if loader.dataset_name not in self.dataset_config.keys():
                 raise ValueError(
-                    f"Invalid dataset loader: '{dataset_name}' is not configured for this task. "
+                    f"Invalid dataset loader: '{loader_key}' is not configured for this task. "
                     f"Ensure that the names match one of the configured datasets: {list(self.dataset_config.keys())}."
                 )
 

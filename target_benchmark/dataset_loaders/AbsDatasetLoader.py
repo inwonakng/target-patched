@@ -217,7 +217,11 @@ class AbsDatasetLoader(ABC):
         """
         if not self.corpus:
             raise RuntimeError("Corpus datasets have not been loaded!")
-        return self.corpus.num_rows
+        size = self.corpus.num_rows
+        if self.num_tables is not None:
+            size = min(self.num_tables, size)
+        return size
+        # return self.corpus.num_rows
 
     def get_queries(self) -> Dataset:
         """

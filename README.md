@@ -73,6 +73,30 @@ pip install git+https://github.com/inwonakng/target-patched
       eval_dataloaders[dataset_name] = GenericDatasetLoader(**config.model_dump())
   ```
 
+- `AbsDatasetLoader` return incorrect number of tables when NIH tables (gittables) are included.
+  - The logic for counting tables in `get_corpus_size` always uses the full set of tables, so there needs to be a check to see if actual number of tables being used is smaller than the full set. 
+
+  ```python
+  size = self.corpus.num_rows
+  if self.num_tables is not None:
+      size = min(self.num_tables, size)
+  return size
+  ```
+
+- `_validate_dataset_loaders` raises a `ValueError` when NIH tables (gittables) are included in a task.
+  - `TARGET._load_datasets_for_task` renames task loaders to composite keys via `construct_dataset_name_for_eval` (e.g. `"fetaqa"` → `"fetaqa_gittables_10000"`), but `_validate_dataset_loaders` checked against the original `dataset_config` keys, so the composite key was never found.
+  - Fix: in `target_benchmark/tasks/AbsTask.py`, validate against the loader's `dataset_name` attribute (which always holds the original name) instead of the dict key:
+
+  ```python
+  def _validate_dataset_loaders(self, dataset_loaders: Dict[str, AbsDatasetLoader]):
+      for loader_key, loader in dataset_loaders.items():
+          if loader.dataset_name not in self.dataset_config.keys():
+              raise ValueError(
+                  f"Invalid dataset loader: '{loader_key}' is not configured for this task. "
+                  f"Ensure that the names match one of the configured datasets: {list(self.dataset_config.keys())}."
+              )
+  ```
+
 - Removed dependencies
   - I'm commenting out major dependeices (like `transformers` or `numpy`), so that the other project that depends on this benchmark should take care of the dependencies.
 
