@@ -25,3 +25,11 @@ class AbsRetrieverBase(ABC):
     @abstractmethod
     def retrieve_batch(self, *args, **kwargs) -> List[RetrievalResultDataModel]:
         pass
+
+    def cleanup(self, dataset_name: str) -> None:
+        """
+        Optional hook called by the evaluation pipeline after all queries for a dataset
+        have been processed. Override to flush buffers, close file handles, etc.
+        Default is a no-op.
+        """
+        pass

@@ -97,6 +97,10 @@ pip install git+https://github.com/inwonakng/target-patched
               )
   ```
 
+- Added `cleanup(dataset_name: str)` lifecycle hook to retrievers.
+  - After all queries for a dataset are processed, `AbsTask.task_run` now calls `retriever.cleanup(dataset_name)`. The default implementation in `AbsRetrieverBase` is a no-op, so existing retrievers are unaffected. Override this method in custom retrievers to flush log buffers, close file handles, or perform any other post-retrieval teardown.
+  - Changed files: `target_benchmark/retrievers/AbsRetrieverBase.py`, `target_benchmark/tasks/AbsTask.py`
+
 - Removed dependencies
   - I'm commenting out major dependeices (like `transformers` or `numpy`), so that the other project that depends on this benchmark should take care of the dependencies.
 

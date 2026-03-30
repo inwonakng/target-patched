@@ -385,6 +385,7 @@ class AbsTask(ABC):
                 progress_bar.update(batch_size)
             progress_bar.update(total_num_queries - progress_bar.n)
             progress_bar.close()
+            retriever.cleanup(dataset_name)
 
             # retrieval performance, precision, recall, f1, etc.
             retrieval_performance = self._calculate_table_retrieval_performance(
